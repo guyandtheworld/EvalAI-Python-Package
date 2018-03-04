@@ -31,5 +31,17 @@ Example : `submissions.submit("MNIST", "Phase 1", "results.csv")`
     
 and just run the script and it will display the results on the terminal.
  
+### Viewing the leaderboards.
+
+View the common leaderboards.
+
+    `submissions.show_leaderboards("<CHALLENGE NAME>", "<CHALLENGE PHASE>")`
+
+View the result of your last submission.
+
+    `submissions.show_my_last_submissions("<CHALLENGE NAME>", "<CHALLENGE PHASE>")`
     
+View your all submissions.
+
+    `submissions.show_all_my_submissions("<CHALLENGE NAME>", "<CHALLENGE PHASE>")`
     
