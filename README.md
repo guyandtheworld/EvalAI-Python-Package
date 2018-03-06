@@ -6,7 +6,7 @@ This package can be used connect to the EvalAI server to do a everything from vi
 
 * Use pip to install it on your system.
 
-    `pip install evalai.`
+     `pip install evalai.`
 
 
 * Set up the package just after installation using your username and password.
@@ -21,11 +21,11 @@ And that's it! It's all set-up! You're now ready to use EvalAI through your term
 
 In your python script, import the submission module from the evalai package.
 
-    `from evalai import submissions`
+    from evalai import submissions
     
 Within your script, pass the challenge name, challenge phase and the result file to this end-point.
 
-    `submissions.submit("<CHALLENGE NAME>", "<CHALLENGE PHASE>", "<RESULT FILE>")`
+    submissions.submit("<CHALLENGE NAME>", "<CHALLENGE PHASE>", "<RESULT FILE>")
     
 Example : `submissions.submit("MNIST", "Phase 1", "results.csv")`
     
@@ -35,13 +35,13 @@ and just run the script and it will display the results on the terminal.
 
 View the common leaderboards.
 
-    `submissions.show_leaderboards("<CHALLENGE NAME>", "<CHALLENGE PHASE>")`
+    submissions.show_leaderboards("<CHALLENGE NAME>", "<CHALLENGE PHASE>")
 
 View the result of your last submission.
 
-    `submissions.show_my_last_submissions("<CHALLENGE NAME>", "<CHALLENGE PHASE>")`
+    submissions.show_my_last_submissions("<CHALLENGE NAME>", "<CHALLENGE PHASE>")
     
 View your all submissions.
 
-    `submissions.show_all_my_submissions("<CHALLENGE NAME>", "<CHALLENGE PHASE>")`
+    submissions.show_all_my_submissions("<CHALLENGE NAME>", "<CHALLENGE PHASE>")
     
