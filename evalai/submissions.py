@@ -1,9 +1,10 @@
 import base64
 import json
 import os
+import pandas as pd
 import requests
 
-from utils import get_token
+from utils import get_auth_details, get_challenge_id, get_challenge_phase_id
 
 
 def submit(challenge=None, challenge_phase=None, submission_file=None, domain="http://localhost:8000"):
@@ -14,43 +15,22 @@ def submit(challenge=None, challenge_phase=None, submission_file=None, domain="h
     CHALLENGE_ID = ""
     CHALLENGE_PHASE_ID = ""
     PARTICIPATED = False
-    TOKEN = get_token()
-    AUTH_DETAILS = {
-            "Authorization": "Token: {}".format(TOKEN),
-    }
+    AUTH_DETAILS = get_auth_details()
 
 
-    # Checks if the challenge exist and get the challenge id.
-    challenges_url = "{}/api/challenges/challenge/present"
-    challenges_url = challenges_url.format(domain)
-    response = requests.get(challenges_url, AUTH_DETAILS)
-
-    data = json.loads(response.text)
-
-    if 'results' not in data:
-        raise ValueError('Something went wrong, try again.')
-
-    if len(data['results']) == 0:
-        raise ValueError('No challenges exists.')
-
-    for json_challenge in data['results']:
-        if challenge == json_challenge['title']:
-            CHALLENGE_ID = json_challenge['id']
-            break
-
-    if CHALLENGE_ID == "":
-        raise ValueError('Challenge with that name doesn\'t exist.')
+    CHALLENGE_ID = get_challenge_id(challenge, domain)
 
 
     # Checks if the user is a participant of the Challenge.
 
-    participant_url = "{}/api/participant_teams/challenges/{}/user"
+    challenges_url = "{}/api/challenges/challenge/present"
+    challenges_url = challenges_url.format(domain)
+
+    participant_url = "{}/api/participants/participant_teams/challenges/{}/user"
     participant_url = participant_url.format(domain, CHALLENGE_ID)
 
     response = requests.get(challenges_url, AUTH_DETAILS)
-
     data = json.loads(response.text)
-    print data
     if len(data['results']) == 0:
         raise ValueError('You haven\'t participated in any challenges.')
 
@@ -61,25 +41,8 @@ def submit(challenge=None, challenge_phase=None, submission_file=None, domain="h
     if not PARTICIPATED:
         raise ValueError('You have to participate to submit files!')
 
-    # Checks if the challenge phase exist and get the challenge phase id.
 
-    challenge_phase_url = "{}/api/challenges/challenge/{}/challenge_phase"
-    challenge_phase_url = challenge_phase_url.format(domain, CHALLENGE_ID)
-    response = requests.get(challenge_phase_url, AUTH_DETAILS)
-
-    data = json.loads(response.text)
-    if 'results' not in data:
-        raise ValueError('Something went wrong, try again.')
-
-    if len(data['results']) == 0:
-        raise ValueError('No challenges phases exists.')
-
-    for json_challenge_phase in data['results']:
-        if challenge_phase == json_challenge_phase['name']:
-            CHALLENGE_PHASE_ID = json_challenge_phase['id']
-
-    if CHALLENGE_PHASE_ID == "":
-        raise ValueError('Challenge phase with that name doesn\'t exist.')
+    CHALLENGE_PHASE_ID = get_challenge_phase_id(challenge, challenge_phase, domain)
 
 
     # Doing the submissions.
@@ -92,9 +55,50 @@ def submit(challenge=None, challenge_phase=None, submission_file=None, domain="h
                                 os.path.dirname(__file__)))
 
     file = {'file': open(os.path.join(__location__, submission_file), 'rb')}
-
-    AUTH_DETAILS = {
-            "Authorization": "Token: {}".format(TOKEN),
-    }
-
     response = requests.post(submission_url, AUTH_DETAILS)
+
+
+def leaderboard(challenge=None, challenge_phase=None, domain="http://localhost:8000"):
+    """
+    pretty prints the leader-board of a particular challenge.
+    """
+    AUTH_DETAILS = get_auth_details()
+    CHALLENGE_ID = get_challenge_id(challenge, domain)
+    CHALLENGE_PHASE_ID = get_challenge_phase_id(challenge, challenge_phase, domain)
+    PHASE_SPLIT_ID = ""
+
+    # To find the dataset split according to the phase given.
+    challenge_split_url = '{}/api/challenges/{}/challenge_phase_split'
+    challenge_split_url = challenge_split_url.format(domain, CHALLENGE_ID)
+    response = requests.get(challenge_split_url, AUTH_DETAILS)
+    data = json.loads(response.text)
+
+    for split in data:
+        if CHALLENGE_PHASE_ID == split["challenge_phase"]:
+            PHASE_SPLIT_ID = split["challenge_phase"]
+            break
+
+    # Get the submission data using the phase split id.
+    leaderboard_data_url = "{}/api/jobs/challenge_phase_split/{}/leaderboard/?page_size=1000";
+    leaderboard_data_url = leaderboard_data_url.format(domain, PHASE_SPLIT_ID)
+    response = requests.get(leaderboard_data_url, AUTH_DETAILS)
+    data = json.loads(response.text)
+    results = data['results']
+    
+    # Defining data to be pretty printed.
+    participant_team = []
+    score = []
+    submission_time = []
+    for result in results:
+        participant_team.append(result['submission__participant_team__team_name'])
+        score.append(result['filtering_score'])
+        submission_time.append(result['submission__submitted_at'])
+
+    # Converting json list into pandas data frame.
+    columns = {'Participant Team': participant_team,
+               'Score': score,
+               'Submission time': submission_time}
+    df = pd.DataFrame(columns)
+    df.index += 1
+    df.index.names = ['Rank']
+    print df
