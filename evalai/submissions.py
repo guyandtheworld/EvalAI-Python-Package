@@ -121,8 +121,27 @@ def show_all_my_submissions(challenge=None, challenge_phase=None, domain="http:/
     submissions_url = "{}/api/jobs/challenge/{}/challenge_phase/{}/submission/"
     submissions_url = submissions_url.format(domain, CHALLENGE_ID, CHALLENGE_PHASE_ID)
     response = requests.get(submissions_url, headers=AUTH_DETAILS)
-    print response.text
+    submissions = json.loads(response.text)['results']
 
+    columns = {
+            "Team Name": "participant_team_name",
+            "Execution Time": "execution_time",
+            "Challenge Phase": "challenge_phase",
+            "Status": "status",
+            "Input File": "input_file",
+            "Stdout File": "stdout_file",
+            "Stderr File": "stderr_file",
+            "Submitted At": "submitted_at",
+            "Method Name": "method_name",
+            "Method Description": "method_description",
+            "Project URL": "project_url",
+            "Publication URL": "publication_url",
+            "Submission Result File": "submission_result_file",
+            }
+    df = pd.DataFrame(columns=columns.keys())
+    for i, submission in enumerate(submissions):
+        df.loc[i] = [submission[column] for column in columns.values()]
+    print df
 
 def show_my_last_submission(challenge=None, challenge_phase=None, domain="http://localhost:8000"):
     """

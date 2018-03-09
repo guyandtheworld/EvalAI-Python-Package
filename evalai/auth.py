@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 import pickle
 import requests
 
@@ -30,6 +31,9 @@ def login(username=None, password=None, domain="default"):
     json_token = json.loads(token)
     hashed_token = base64.b64encode(json_token["token"])
 
+    __location__ = os.path.realpath(os.path.join(os.getcwd(),
+                                    os.path.dirname(__file__)))
     outputFile = '.data'
-    with open(outputFile, 'wb') as fw:
+    file_path = os.path.join(__location__, outputFile)
+    with open(file_path, 'wb') as fw:
         pickle.dump({'Token': hashed_token}, fw)
