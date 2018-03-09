@@ -4,7 +4,11 @@ import os
 import pandas as pd
 import requests
 
-from utils import get_auth_details, get_challenge_id, get_challenge_phase_id
+from utils import (
+                   get_auth_details,
+                   get_challenge_id,
+                   get_challenge_phase_id
+                  )
 
 
 def submit(challenge=None, challenge_phase=None, submission_file=None, domain="http://localhost:8000"):
@@ -102,3 +106,34 @@ def leaderboard(challenge=None, challenge_phase=None, domain="http://localhost:8
     df.index += 1
     df.index.names = ['Rank']
     print df
+
+
+def show_all_my_submissions(challenge=None, challenge_phase=None, domain="http://localhost:8000"):
+    """
+    pretty prints all the submissions of a particular user.
+    """
+    AUTH_DETAILS = get_auth_details()
+    CHALLENGE_ID = get_challenge_id(challenge, domain)
+    CHALLENGE_PHASE_ID = get_challenge_phase_id(challenge, challenge_phase, domain)
+    PHASE_SPLIT_ID = ""
+
+    # Fetching user's submission data.
+    submissions_url = "{}/api/jobs/challenge/{}/challenge_phase/{}/submission/"
+    submissions_url = submissions_url.format(domain, CHALLENGE_ID, CHALLENGE_PHASE_ID)
+    response = requests.get(submissions_url, headers=AUTH_DETAILS)
+    print response.text
+
+
+def show_my_last_submission(challenge=None, challenge_phase=None, domain="http://localhost:8000"):
+    """
+    pretty prints all the submissions of a particular user.
+    """
+    pass
+
+
+def get_position_leaderboard(challenge=None, challenge_phase=None, domain="http://localhost:8000"):
+    """
+    pretty prints all the submissions of a particular user.
+    """
+    pass
+

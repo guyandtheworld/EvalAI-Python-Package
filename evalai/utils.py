@@ -21,7 +21,7 @@ def get_auth_details():
     token = base64.b64decode(data["Token"])
 
     AUTH_DETAILS = {
-            "Authorization": "Token: {}".format(token),
+            "Authorization": "Token {}".format(token),
     }
 
     return AUTH_DETAILS
@@ -33,7 +33,7 @@ def get_challenge_id(challenge=None, domain=None):
     """
     challenges_url = "{}/api/challenges/challenge/present"
     challenges_url = challenges_url.format(domain)
-    response = requests.get(challenges_url, AUTH_DETAILS)
+    response = requests.get(challenges_url)
 
     data = json.loads(response.text)
 
@@ -62,7 +62,7 @@ def get_challenge_phase_id(challenge=None, challenge_phase=None, domain=None):
 
     challenge_phase_url = "{}/api/challenges/challenge/{}/challenge_phase"
     challenge_phase_url = challenge_phase_url.format(domain, CHALLENGE_ID)
-    response = requests.get(challenge_phase_url, AUTH_DETAILS)
+    response = requests.get(challenge_phase_url)
 
     data = json.loads(response.text)
     if 'results' not in data:

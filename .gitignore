@@ -73,7 +73,7 @@ target/
 # pyenv
 .python-version
 
-.data
+evalai/.data
 
 # celery beat schedule file
 celerybeat-schedule
