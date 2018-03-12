@@ -46,10 +46,10 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'evalai = evalai.cli.main:main'
+            'evalai = evalai.main:main'
         ],
         'evalai': [
-            'login = evalai.cli.auth:LoginCLI',
+            'login = evalai.auth:LoginCLI',
         ],
     },
 

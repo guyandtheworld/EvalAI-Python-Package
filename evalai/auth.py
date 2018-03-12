@@ -1,8 +1,11 @@
 import base64
 import json
+import logging
 import os
 import pickle
 import requests
+
+from cliff.command import Command
 
 
 def login(username=None, password=None, domain="default"):
@@ -37,3 +40,23 @@ def login(username=None, password=None, domain="default"):
     file_path = os.path.join(__location__, outputFile)
     with open(file_path, 'wb') as fw:
         pickle.dump({'Token': hashed_token}, fw)
+
+
+class LoginCLI(Command):
+    "Login to EvalAI"
+
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(LoginCLI, self).get_parser(prog_name)
+        parser.add_argument('-u', '--username', help='username')
+        parser.add_argument('-p', '--password', help='password')
+        return parser
+
+    def take_action(self, parsed_args):
+        parsed_arg_dict = vars(parsed_args)
+
+        username = parsed_arg_dict['username']
+        password = parsed_arg_dict['password']
+
+        login(username=username, password=password)

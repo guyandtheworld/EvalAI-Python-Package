@@ -11,42 +11,40 @@ from utils import (
                   )
 
 
-def submit(challenge=None, challenge_phase=None, submission_file=None, domain="http://localhost:8000"):
+def submit(challenge=None, challenge_phase=None, submission_file=None, submission_details=None, **kwargs):
     """
     This is used to connect to submit a file to a specic phase of an active challenge
     """
 
+    if len(kwargs) == 0:
+        domain = "http://localhost:8000"
+
     CHALLENGE_ID = ""
     CHALLENGE_PHASE_ID = ""
     PARTICIPATED = False
-    AUTH_DETAILS = get_auth_details()
+    HEADERS = get_auth_details()
 
 
     CHALLENGE_ID = get_challenge_id(challenge, domain)
+    CHALLENGE_PHASE_ID = get_challenge_phase_id(challenge, challenge_phase, domain)
 
 
     # Checks if the user is a participant of the Challenge.
 
-    challenges_url = "{}/api/challenges/challenge/present"
-    challenges_url = challenges_url.format(domain)
-
     participant_url = "{}/api/participants/participant_teams/challenges/{}/user"
     participant_url = participant_url.format(domain, CHALLENGE_ID)
 
-    response = requests.get(challenges_url, AUTH_DETAILS)
+    response = requests.get(participant_url, headers=HEADERS)
     data = json.loads(response.text)
-    if len(data['results']) == 0:
+    if len(data['challenge_participant_team_list']) == 0:
         raise ValueError('You haven\'t participated in any challenges.')
 
-    for json_challenge in data['results']:
-        if challenge == json_challenge['title']:
+    for json_challenge in data['challenge_participant_team_list']:
+        if challenge == json_challenge['challenge']['title']:
             PARTICIPATED = True
 
     if not PARTICIPATED:
         raise ValueError('You have to participate to submit files!')
-
-
-    CHALLENGE_PHASE_ID = get_challenge_phase_id(challenge, challenge_phase, domain)
 
 
     # Doing the submissions.
@@ -57,9 +55,18 @@ def submit(challenge=None, challenge_phase=None, submission_file=None, domain="h
     # Location of the submission file
     __location__ = os.path.realpath(os.path.join(os.getcwd(),
                                 os.path.dirname(__file__)))
-
-    file = {'file': open(os.path.join(__location__, submission_file), 'rb')}
-    response = requests.post(submission_url, AUTH_DETAILS)
+    data = {
+            'status': 'submitting',
+            'input_file': json.dumps(open(submission_file).read()),
+            'method_name': submission_details['method_name'],
+            'method_description': submission_details['method_description'],
+            'project_url': submission_details['project_url'],
+            'publication_url': submission_details['publication_url'],
+           }
+    json_data = json.dumps(data)
+    HEADERS['Content-Type'] = 'application/json'
+    response = requests.post(submission_url, headers=HEADERS, data=json_data)
+    print response.text
 
 
 def leaderboard(challenge=None, challenge_phase=None, domain="http://localhost:8000"):
