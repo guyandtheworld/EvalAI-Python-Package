@@ -25,7 +25,20 @@ In your python script, import the submission module from the evalai package.
     
 Within your script, pass the challenge name, challenge phase and the result file to this end-point.
 
-    submissions.submit("<CHALLENGE NAME>", "<CHALLENGE PHASE>", "<RESULT FILE>")
+     details = {
+            'method_name': "CNN_01",
+            'method_description': "First Iteration",
+            'project_url': "N/A",
+            'publication_url': "N/A",
+           }
+
+     submissions.submit(
+                        challenge="Oasis",
+                        challenge_phase="Jeffrey Phase",
+                        submission_file="results.csv",
+                        submissions_details=details
+                        )
+
     
 Example : `submissions.submit("MNIST", "Phase 1", "results.csv")`
     
